@@ -1,3 +1,274 @@
-welcome to craft new page
-event
-news
+CRUD in PHP
+create1.php
+
+
+<?php include('crudquery.php'); ?>
+
+<?php
+if (isset($_GET['edit'])) {
+$id = $_GET['edit'];
+$update = true;
+$record = mysqli_query("SELECT * FROM employee WHERE id=$id");
+
+if (count($record) == 1 ) {
+$n = mysqli_fetch_array($record);
+$name = $n['firstname'];
+$lname = $n['lasttname'];
+$salary = $n['salary'];
+}
+}
+?>
+
+
+
+<? session_start();?>
+
+
+<html>
+<head>
+<title>CRUD: CReate, Update, Delete PHP MySQL</title>
+</head>
+<style type="text/css">
+body {
+font-size: 19px;
+}
+table{
+width: 50%;
+margin: 30px auto;
+border-collapse: collapse;
+text-align: left;
+}
+tr {
+border-bottom: 1px solid #cbcbcb;
+}
+th, td{
+border: none;
+height: 30px;
+padding: 2px;
+}
+tr:hover {
+background: #F5F5F5;
+}
+
+form {
+width: 45%;
+margin: 50px auto;
+text-align: left;
+padding: 20px;
+border: 1px solid #bbbbbb;
+border-radius: 5px;
+}
+
+.input-group {
+margin: 10px 0px 10px 0px;
+}
+.input-group label {
+display: block;
+text-align: left;
+margin: 3px;
+}
+.input-group input {
+height: 30px;
+width: 93%;
+padding: 5px 10px;
+font-size: 16px;
+border-radius: 5px;
+border: 1px solid gray;
+}
+.btn {
+padding: 10px;
+font-size: 15px;
+color: white;
+background: #5F9EA0;
+border: none;
+border-radius: 5px;
+}
+.edit_btn {
+text-decoration: none;
+padding: 2px 5px;
+background: #2E8B57;
+color: white;
+border-radius: 3px;
+}
+
+.del_btn {
+text-decoration: none;
+padding: 2px 5px;
+color: white;
+border-radius: 3px;
+background: #800000;
+}
+.msg {
+margin: 30px auto;
+padding: 10px;
+border-radius: 5px;
+color: #3c763d;
+background: #dff0d8;
+border: 1px solid #3c763d;
+width: 50%;
+text-align: center;
+}
+</style>
+<body>
+
+<?php if (isset($_SESSION['message'])): ?>
+<div class="msg">
+<?php
+echo $_SESSION['message'];
+unset($_SESSION['message']);
+?>
+</div>
+<?php endif ?>
+
+<!-- shw data code -->
+
+<table border="4">
+<div class="container">
+<tr>
+<th>id</th>
+<th>Firstname</th>
+<th>Lastname</th>
+<th>salary</th>
+<th>operation</th>
+</tr>
+<tr>
+<?php
+
+
+$sql = "SELECT * FROM employee";
+$result = $conn->query($sql);
+if ($result->num_rows > 0) {
+while($row = $result->fetch_assoc()) {
+?>
+<td><?php echo $row['id'];?></td>
+<td><?php echo $row['firstname'];?></td>
+<td><?php echo $row['lasttname'];?></td>
+<td><?php echo $row['salary'];?></td>
+<td><a href="create1.php?edit=<?php echo $row['id']; ?>" class="edit_btn" >Edit</a></td>
+<td><a href="crudquery.php?del=<?php echo $row['id']; ?>" class="del_btn">Delete</a></td>
+
+
+</tr>
+<?php
+}
+} else {
+echo "0 results";
+}
+?>
+</div>
+</table>
+
+<!-- end code -->
+
+
+
+
+
+
+<form action="crudquery.php" method="post" >
+<!-- strart input hidden filed for update the id -->
+<input type="hidden" name="id" value="<?php echo $id; ?>">
+<!-- end -->
+<div class="input-group">
+<label>FirstName</label>
+<input type="text" name="firstname" value="<?php echo $name; ?>">
+</div>
+<div class="input-group">
+<label>lastName</label>
+<input type="text" name="lasttname" value="<?php echo $lname; ?>">
+</div>
+<div class="input-group">
+<label>Salary</label>
+<input type="text" name="salary" value="<?php echo $salary; ?>">
+</div>
+<div class="input-group">
+<?php if ($update == true): ?>
+<button class="btn" type="submit" name="update" style="background: #556B2F;" >update</button>
+<?php else: ?>
+<button class="btn" type="submit" name="save" >Save</button>
+<?php endif ?>
+
+<!-- <button class="btn" type="submit" name="save" >Save</button> -->
+</div>
+</form>
+</body>
+</html>
+
+
+////////////CRUDQUERY.php
+
+
+<?php
+
+session_start();
+
+$servername = "localhost";
+$username = "root";
+$password = "root";
+$db = "crud2";
+
+// Create connection
+$conn = mysqli_connect($servername, $username, $password, $db);
+
+// initialize variables
+$name = "";
+$address = "";
+$id = 0;
+$update = false;
+
+if (isset($_POST['save'])) {
+$name = $_POST['firstname'];
+$lname = $_POST['lasttname'];
+$salary = $_POST['salary'];
+
+$sql = "INSERT INTO employee (firstname, lasttname, salary)
+values ('$name', '$lname', '$salary')";
+if($conn->query($sql)){
+echo "record inserted successfully"."<br>";
+}
+else{
+echo "error:" .$sql."<br>".$conn->error;
+}
+
+$_SESSION['message'] = "record submitted successfully";
+header('location: create1.php');
+}
+
+
+///update query
+if (isset($_POST['update'])) {
+$id = $_POST['id'];
+$name = $_POST['firstname'];
+$lname = $_POST['lasttname'];
+$salary = $_POST['salary'];
+
+$sql = "UPDATE employee SET firstname='$name',lasttname='$lname',salary='$salary' WHERE id=$id";
+if (mysqli_query($conn, $sql)) {
+echo "Record updated successfully"."<br>";
+} else {
+echo "Error updating record: " . mysqli_error($conn);
+}
+$_SESSION['message'] = "record updated successfully!";
+header('location: create1.php');
+}
+
+
+/////delete record
+
+if (isset($_GET['del'])) {
+$id = $_GET['del'];
+
+
+$sql = "DELETE FROM employee WHERE id = $id";
+if (mysqli_query($conn, $sql)) {
+echo "Record deleted successfully";
+} else {
+
+echo "Error deleting record: " . mysqli_error($conn);
+}
+
+
+$_SESSION['message'] = "record deleted successfully!";
+header('location: create1.php');
+}
+
